@@ -58,7 +58,6 @@ end
 namespace :version do
   desc "create a new version, create tag and push to github"
   task :github_and_tag do
-    Rake::Task['github:release'].invoke
     Rake::Task['git:release'].invoke
   end
 
