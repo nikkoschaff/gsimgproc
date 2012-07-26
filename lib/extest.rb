@@ -30,12 +30,13 @@ puts "done"
 count = 0
 theEnd = Time.now
 
+=begin
 resultValues.each { |rvalue|
 	puts fnames[count]
 	puts rvalue.last.last
 	count += 1
 }
-
+=end
 puts theStart
 puts theEnd
 
