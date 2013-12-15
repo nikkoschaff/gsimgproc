@@ -206,7 +206,7 @@ const void ImageReader::prepShowImage( std::string &filename, std::string &outna
 		findCalibCornerPoints( examImage, UL, UR, LL, LR );
 		orientImage( examImage, UL, UR, LL, LR, widthRatio, heightRatio );
 		vector<int> compression_params;
-		compression_params.push_back( CV_IMWRITE_JPEG_QUALITY );
+		compression_params.push_back( 95 );
         imwrite(outname, examImage, compression_params);
     } catch (...) {
         return;

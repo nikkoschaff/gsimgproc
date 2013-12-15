@@ -12,11 +12,11 @@ ECHO = $(ECHO1:0=@echo)
 #### Start of system configuration section. ####
 
 srcdir = .
-topdir = /usr/local/rvm/rubies/ruby-1.9.3-p194/include/ruby-1.9.1
-hdrdir = /usr/local/rvm/rubies/ruby-1.9.3-p194/include/ruby-1.9.1
-arch_hdrdir = /usr/local/rvm/rubies/ruby-1.9.3-p194/include/ruby-1.9.1/$(arch)
+topdir = /usr/local/rvm/rubies/ruby-1.9.3-p429/include/ruby-1.9.1
+hdrdir = /usr/local/rvm/rubies/ruby-1.9.3-p429/include/ruby-1.9.1
+arch_hdrdir = /usr/local/rvm/rubies/ruby-1.9.3-p429/include/ruby-1.9.1/$(arch)
 VPATH = $(srcdir):$(arch_hdrdir)/ruby:$(hdrdir)/ruby
-prefix = $(DESTDIR)/usr/local/rvm/rubies/ruby-1.9.3-p194
+prefix = $(DESTDIR)/usr/local/rvm/rubies/ruby-1.9.3-p429
 rubylibprefix = $(libdir)/$(RUBY_BASE_NAME)
 exec_prefix = $(prefix)
 vendorhdrdir = $(rubyhdrdir)/vendor_ruby
@@ -38,7 +38,7 @@ oldincludedir = $(DESTDIR)/usr/include
 includedir = $(prefix)/include
 localstatedir = $(prefix)/var
 sharedstatedir = $(prefix)/com
-sysconfdir = $(prefix)/etc
+sysconfdir = $(DESTDIR)/etc
 datadir = $(datarootdir)
 datarootdir = $(prefix)/share
 libexecdir = $(exec_prefix)/libexec
@@ -57,23 +57,24 @@ CC = g++
 CXX = g++
 LIBRUBY = $(LIBRUBY_SO)
 LIBRUBY_A = lib$(RUBY_SO_NAME)-static.a
-LIBRUBYARG_SHARED = -Wl,-R -Wl,$(libdir) -L$(libdir) -l$(RUBY_SO_NAME)
-LIBRUBYARG_STATIC = -Wl,-R -Wl,$(libdir) -L$(libdir) -l$(RUBY_SO_NAME)-static
-OUTFLAG = -o 
-COUTFLAG = -o 
+LIBRUBYARG_SHARED = '-Wl,-rpath,$${ORIGIN}/../lib' -Wl,-R -Wl,$(libdir) -L$(libdir) -l$(RUBY_SO_NAME)
+LIBRUBYARG_STATIC = '-Wl,-rpath,$${ORIGIN}/../lib' -Wl,-R -Wl,$(libdir) -L$(libdir) -l$(RUBY_SO_NAME)-static
+empty =
+OUTFLAG = -o $(empty)
+COUTFLAG = -o $(empty)
 
 RUBY_EXTCONF_H = 
 cflags   =  $(optflags) $(debugflags) $(warnflags)
 optflags = -O3
 debugflags = -ggdb
-warnflags = -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wimplicit-function-declaration
+warnflags = -Wall -Wextra -Wno-unused-parameter -Wno-parentheses -Wno-long-long -Wno-missing-field-initializers -Wpointer-arith -Wwrite-strings -Wdeclaration-after-statement -Wimplicit-function-declaration
 CFLAGS   = -fPIC $(cflags)  -fPIC $(ARCH_FLAG)
 INCFLAGS = -I. -I$(arch_hdrdir) -I$(hdrdir)/ruby/backward -I$(hdrdir) -I$(srcdir)
 DEFS     = 
-CPPFLAGS =  -I/usr/local/rvm/usr/include  $(DEFS) $(cppflags)
+CPPFLAGS =   $(DEFS) $(cppflags)
 CXXFLAGS = $(CFLAGS) $(cxxflags)
 ldflags  = -L.  -rdynamic -Wl,-export-dynamic
-dldflags = 
+dldflags =  
 ARCH_FLAG = 
 DLDFLAGS = $(ldflags) $(dldflags) $(ARCH_FLAG)
 LDSHARED = $(CXX) -shared
@@ -87,7 +88,7 @@ RUBY_SO_NAME = ruby
 arch = x86_64-linux
 sitearch = $(arch)
 ruby_version = 1.9.1
-ruby = /usr/local/rvm/rubies/ruby-1.9.3-p194/bin/ruby
+ruby = /usr/local/rvm/rubies/ruby-1.9.3-p429/bin/ruby
 RUBY = $(ruby)
 RM = rm -f
 RM_RF = $(RUBY) -run -e rm -- -rf
@@ -97,13 +98,14 @@ INSTALL = /usr/bin/install -c
 INSTALL_PROG = $(INSTALL) -m 0755
 INSTALL_DATA = $(INSTALL) -m 644
 COPY = cp
+TOUCH = exit >
 
 #### End of system configuration section. ####
 
 preload = 
 
-libpath = . $(libdir) /usr/local/rvm/usr/lib
-LIBPATH =  -L. -L$(libdir) -Wl,-R$(libdir) -L/usr/local/rvm/usr/lib -Wl,-R/usr/local/rvm/usr/lib
+libpath = . $(libdir)
+LIBPATH =  -L. -L$(libdir) -Wl,-R$(libdir)
 DEFFILE = 
 
 CLEANFILES = mkmf.log
@@ -115,9 +117,11 @@ extout_prefix =
 target_prefix = 
 LOCAL_LIBS = 
 LIBS = $(LIBRUBYARG_SHARED) -lpthread -lopencv_imgproc -lopencv_core -lopencv_highgui  -lpthread -lrt -ldl -lcrypt -lm   -lc
-SRCS = ImageReader.cpp Imgproc.cpp ResThread.cpp
-OBJS = ImageReader.o Imgproc.o ResThread.o
+SRCS = ImageReader.cpp ResThread.cpp Imgproc.cpp
+OBJS = ImageReader.o ResThread.o Imgproc.o
 TARGET = Imgproc
+TARGET_NAME = Imgproc
+TARGET_ENTRY = Init_$(TARGET_NAME)
 DLLIB = $(TARGET).so
 EXTSTATIC = 
 STATIC_LIB = 
@@ -138,11 +142,12 @@ static: $(STATIC_LIB)
 .PHONY: all install static install-so install-rb
 .PHONY: clean clean-so clean-rb
 
+clean-static::
 clean-rb-default::
 clean-rb::
 clean-so::
-clean: clean-so clean-rb-default clean-rb
-		@-$(RM) $(CLEANLIBS) $(CLEANOBJS) $(CLEANFILES)
+clean: clean-so clean-static clean-rb-default clean-rb
+		-$(Q)$(RM) $(CLEANLIBS) $(CLEANOBJS) $(CLEANFILES) .*.time
 
 distclean-rb-default::
 distclean-rb::
@@ -155,19 +160,21 @@ distclean: clean distclean-so distclean-rb-default distclean-rb
 realclean: distclean
 install: install-so install-rb
 
-install-so: $(RUBYARCHDIR)
 install-so: $(RUBYARCHDIR)/$(DLLIB)
 $(RUBYARCHDIR)/$(DLLIB): $(DLLIB)
-	@-$(MAKEDIRS) $(@D)
+	-$(Q)$(MAKEDIRS) $(@D)
 	$(INSTALL_PROG) $(DLLIB) $(@D)
+clean-static::
+	-$(Q)$(RM) $(STATIC_LIB)
 install-rb: pre-install-rb install-rb-default
 install-rb-default: pre-install-rb-default
 pre-install-rb: Makefile
 pre-install-rb-default: Makefile
 pre-install-rb-default:
 	$(ECHO) installing default Imgproc libraries
-$(RUBYARCHDIR):
-	$(Q) $(MAKEDIRS) $@
+./.RUBYARCHDIR.time:
+	$(Q) $(MAKEDIRS) $(RUBYARCHDIR)
+	$(Q) $(TOUCH) $@
 
 site-install: site-install-so site-install-rb
 site-install-so: install-so
@@ -205,7 +212,7 @@ site-install-rb: install-rb
 
 $(DLLIB): $(OBJS) Makefile
 	$(ECHO) linking shared-object $(DLLIB)
-	@-$(RM) $(@)
+	-$(Q)$(RM) $(@)
 	$(Q) $(LDSHAREDXX) -o $@ $(OBJS) $(LIBPATH) $(DLDFLAGS) $(LOCAL_LIBS) $(LIBS)
 
 
